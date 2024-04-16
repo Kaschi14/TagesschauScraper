@@ -1,8 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from bs4.element import Tag
 from requests.models import Response
-from typing import Dict, Union
 
 
 def get_soup_from_url(url: str) -> BeautifulSoup:
@@ -18,25 +16,12 @@ def get_soup(response: Response) -> BeautifulSoup:
     return BeautifulSoup(response.text, "html.parser")
 
 
-def get_text_from_html(
-    soup: BeautifulSoup, element: Dict[str, str], separator: str = "\n"
-) -> Union[str, None]:
-    html_element = soup.find(attrs=element)
-    if isinstance(html_element, Tag):
-        return html_element.get_text(strip=True, separator=separator)
-    else:
-        return None
+def get_text_from_html(soup, element, separator="\n"):
+    return soup.find(**element).get_text(strip=True, separator=separator)
 
 
-def get_link_from_html(
-    soup: BeautifulSoup, element: Dict[str, str]
-) -> Union[str, None]:
-    html_element = soup.find(attrs=element)
-    if isinstance(html_element, Tag):
-        result = html_element.get("href")
-        if isinstance(result, str):
-            return result
-    return None
+def get_link_from_html(soup, element):
+    return soup.find(**element).get("href")
 
 
 class WebsiteTest:
@@ -44,20 +29,19 @@ class WebsiteTest:
     Testing if a website works as expected.
     """
 
-    def __init__(self, response: requests.Response) -> None:
+    def __init__(self, url):
+        self.url = url
+        response = requests.get(url=self.url)
         self.soup = get_soup(response)
 
     def is_element(
-        self,
-        name: Union[str, None] = None,
-        attrs: Dict[str, str] = {},
-        **kwargs: Dict[str, str],
-    ) -> bool:
+        self, name=None, attrs={}, recursive=True, string=None, **kwargs
+    ):
         """
         Check if html element exists on website.
         """
         if self.soup.find(
-            name=name, attrs=attrs, recursive=True, string=None, **kwargs
+            name=None, attrs={}, recursive=True, string=None, **kwargs
         ):
             return True
         else:
@@ -66,16 +50,19 @@ class WebsiteTest:
     def is_text_in_element(
         self,
         target_text: str,
-        name: Union[str, None] = None,
-        attrs: Dict[str, str] = {},
-        **kwargs: Dict[str, str],
-    ) -> bool:
-        """
+        name=None,
+        attrs={},
+        recursive=True,
+        string=None,
+        **kwargs,
+    ):
+        f"""
         Check if text is in html element.
+
+        Docstring for bs4 function find:
+        {self.soup.find.__doc__}
         """
-        result = self.soup.find(
-            name=name, attrs=attrs, recursive=True, string=None, **kwargs
-        )
+        result = self.soup.find(name, attrs, recursive, string, **kwargs)
         if result:
             return target_text in result.get_text()
         else:

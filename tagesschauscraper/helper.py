@@ -1,11 +1,13 @@
 import hashlib
+import json
 import os
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import Union
 
 
 def transform_datetime_str(datetime_string: str) -> str:
     """
+    '31.03.2022 • 22:56 Uhr'
     Transform datetime string to "%Y-%m-%d %H:%M:00".
 
     Parameters
@@ -25,14 +27,14 @@ def transform_datetime_str(datetime_string: str) -> str:
     transform_datetime_str("30.01.2021 -    20:04 Uhr")
     >>> 2021-01-30 20:04:00
     """
-    date, time = [x.strip() for x in datetime_string.split("-")]
+    date, time = [x.strip() for x in datetime_string.split("•")]
     day, month, year = date.split(".")
     hour, minute = time.split(" ")[0].split(":")
     second = "00"
     return f"{year}-{month}-{day} {hour}:{minute}:{second}"
 
 
-def get_hash_from_string(string: str) -> str:
+def get_hash_from_string(string):
     result = hashlib.sha1(string.encode())
     return result.hexdigest()
 
@@ -71,19 +73,16 @@ class DateDirectoryTreeCreator:
         root_dir: Union[str, None] = None,
     ) -> str:
         """
-        Create a hierarchical file path from the given date object without
-        creating directories.
+        Create a hierarchical file path from the given date object without creating directories.
 
         Parameters
         ----------
         date_pattern : str, optional
             The date pattern describes the directory structure.
-            Default date pattern from class initialization will be used when no
-            pattern is provided.
+            Default date pattern from class initialization will be used when no pattern is provided.
         root_dir : str, optional
             The base directory where the directory tree will be generated.
-            Default root directory from class initialization will be used when
-            no directory is provided.
+            Default root directory from class initialization will be used when no directory is provided.
         """
         if date_pattern is None:
             date_pattern = self.date_pattern
@@ -106,12 +105,10 @@ class DateDirectoryTreeCreator:
         ----------
         date_pattern : str, optional
             The date pattern describes the directory structure.
-            Default date pattern from class initialization will be used when
-            no pattern is provided.
+            Default date pattern from class initialization will be used when no pattern is provided.
         root_dir : str, optional
             The base directory where the directory tree will be generated.
-            Default root directory from class initialization will be used when
-            no directory is provided.
+            Default root directory from class initialization will be used when no directory is provided.
         """
         file_path = self.create_file_path_from_date(date_pattern, root_dir)
         self.make_dir_tree_from_file_path(file_path)
@@ -125,7 +122,7 @@ def create_file_name_from_date(
     date_pattern: Union[str, None] = None,
     prefix: str = "",
     suffix: str = "",
-    extension: str = "",
+    extension="",
 ) -> str:
     """
     Create a file name from a date object.
@@ -159,32 +156,7 @@ def create_file_name_from_date(
     return file_name
 
 
-def get_date_range(start_date: date, end_date: date) -> list[date]:
-    """
-    Return a date range from start date (inclusive) to end date (exclusive)
-    with an interval of 1 day.
-
-    Parameters
-    ----------
-    start_date : date
-        Start date (inclusive)
-    end_date : date
-        End date (exclusive)
-
-    Returns
-    -------
-    list[date]
-        List of dates
-
-    Raises
-    ------
-    ValueError
-        When end_date is before start_date
-    """
-    if end_date > start_date:
-        days_between = (end_date - start_date).days
-        return [
-            start_date + timedelta(days=days) for days in range(days_between)
-        ]
-    else:
-        raise ValueError("end_date must be after start_date.")
+def save_to_json(obj_: dict, file_path):
+    with open(file_path, "w") as fp:
+        json.dump(obj_, fp, indent=4)
+    print(f"Saved to: {file_path}")
