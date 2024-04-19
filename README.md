@@ -7,10 +7,7 @@ Edited for a side project, use at your own risk. Should work with the new header
 Thanks to OG for creating this scraper.
 
 ## Install
-Tagesschauscraper is available on PyPI:
-```sh
-$ pip install tagesschauscraper
-```
+Install locally using the setup.py file
 
 ## Usage
 
